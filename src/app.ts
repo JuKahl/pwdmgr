@@ -1,7 +1,27 @@
-const [command] = process.argv.slice(2);
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
+import {
+  closeDB,
+  connectDB,
+  getColletion,
+  createPasswordDoc,
+  readPasswordDoc,
+  updatePasswordValue,
+  updatePasswordDoc,
+  deletePasswordDoc,
+} from "./db";
+dotenv.config();
 
-if (command === "set") {
-  console.log("You like to get something?");
-} else if (command === "get") {
-  console.log("What should i get?");
-}
+const run = async () => {
+  const url = process.env.MONGODB_URL;
+
+  try {
+    await connectDB(url, "pwdmgr-julian");
+
+    await closeDB();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+run();
