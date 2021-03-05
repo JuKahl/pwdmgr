@@ -1,6 +1,11 @@
 import { printWelcomeMessage, printNoAccess } from "./messages";
 import { askForLogin, askForAction } from "./questions";
-import { hasAccess, handleGetPassword, handleSetPassword } from "./commands";
+import {
+  hasAccess,
+  handleGetPassword,
+  handleSetPassword,
+  handleDeletePassword,
+} from "./commands";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import {
@@ -13,6 +18,7 @@ import {
   updatePasswordDoc,
   deletePasswordDoc,
 } from "./db";
+
 dotenv.config();
 
 const run = async () => {
@@ -28,19 +34,24 @@ const run = async () => {
   try {
     await connectDB(url, "pwdmgr-julian");
 
-    await closeDB();
-  } catch (error) {
-    console.error(error);
-
     const action = await askForAction();
     switch (action.command) {
       case "set":
-        handleSetPassword(action.passwordName);
+        await handleSetPassword(action.passwordName);
         break;
       case "get":
-        handleGetPassword(action.passwordName);
+        await handleGetPassword(action.passwordName);
+        break;
+      // case "update:":
+      //   await handleUpdatePassword(action.passwordName);
+      //   break;
+      case "delete":
+        await handleDeletePassword(action.passwordName);
         break;
     }
+    await closeDB();
+  } catch (error) {
+    console.error(error);
   }
 };
 run();
