@@ -26,6 +26,8 @@ export const askForAction = () => {
       choices: [
         { title: "Get a password", value: "get" },
         { title: "Set a password", value: "set" },
+        // { title: "Update a password", value: "update" },
+        { title: "Delete a password", value: "delete" },
       ],
     },
     {
