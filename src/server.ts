@@ -1,14 +1,10 @@
 import http from "http";
 import dotenv from "dotenv";
 import { connect } from "mongodb";
-import {
-  connectDB,
-  createPasswordDoc,
-  deletePasswordDoc,
-  readPasswordDoc,
-} from "./db";
+import { connectDB } from "./db";
 import { type } from "os";
-import type { PasswordDoc } from "./db";
+// import type { PasswordDoc } from "./db";
+import { handleDelete, handleGet, handlePatch, handlePost } from "./routes";
 
 dotenv.config();
 
@@ -17,18 +13,6 @@ const url = process.env.MONGODB_URL;
 
 connectDB(url, "pwdmgr-julian");
 
-const parseJSONBody = <T>(request: http.IncomingMessage): Promise<T> => {
-  return new Promise((resolve) => {
-    let data = "";
-    request.on("data", (chunk) => {
-      data += chunk;
-    });
-    request.on("end", () => {
-      resolve(JSON.parse(data));
-    });
-  });
-};
-
 const server = http.createServer(async (request, response) => {
   if (request.url === "/") {
     response.statusCode = 200;
@@ -36,46 +20,33 @@ const server = http.createServer(async (request, response) => {
     response.end("<h1>Safe Me!</h1>");
     return;
   }
+  if (request.method === "POST") {
+    handlePost(request, response);
+    return;
+  }
+  if (request.method === "PATCH") {
+    handlePatch(request, response);
+    return;
+  }
 
-  const parts = request.url.split("/");
-  const passwordName = parts[parts.length - 1];
+  const parts = request.url.match(/\/api\/passwords\/(\w+)/);
+  if (!parts) {
+    response.statusCode = 400;
+    response.end();
+    return;
+  }
+  const passwordName = parts[1];
 
   if (request.method === "GET") {
-    const passwordDoc = await readPasswordDoc(passwordName);
-    if (!passwordDoc) {
-      response.statusCode = 404;
-      response.end();
-      return;
-    }
-    response.statusCode = 200;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(passwordDoc));
+    handleGet(request, response, passwordName);
     return;
   }
-
-  if (request.method === "POST") {
-    const newPassword = await parseJSONBody<PasswordDoc>(request);
-    const passwordDoc = await createPasswordDoc(newPassword);
-    console.log(newPassword);
-    response.statusCode = 200;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(passwordDoc));
-    return;
-  }
-
   if (request.method === "DELETE") {
-    const passwordDoc = await deletePasswordDoc(passwordName);
-    if (!passwordDoc) {
-      response.statusCode = 404;
-      response.end();
-      return;
-    }
-    response.statusCode = 200;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(passwordDoc));
+    handleDelete(request, response, passwordName);
     return;
   }
 
+  response.statusCode = 405;
   response.end();
 });
 

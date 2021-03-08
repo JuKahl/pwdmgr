@@ -25,13 +25,16 @@ export function closeDB() {
   client.close();
 }
 
-export async function createPasswordDoc(passwordDoc: PasswordDoc) {
+export async function createPasswordDoc(
+  passwordDoc: PasswordDoc
+): Promise<boolean> {
   const passwordCollection = await getColletion<PasswordDoc>("passwords");
   const encryptedPasswordDoc = {
     name: passwordDoc.name,
     value: encryptPassword(passwordDoc.value),
   };
-  return await passwordCollection.insertOne(encryptedPasswordDoc);
+  const inserted = await passwordCollection.insertOne(encryptedPasswordDoc);
+  return inserted.insertedCount >= 1;
 }
 
 export async function readPasswordDoc(

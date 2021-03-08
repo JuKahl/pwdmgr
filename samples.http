@@ -1,11 +1,11 @@
 ### GET a password by name
-GET http://localhost:3333/api/passwords/asdf
+GET http://localhost:3333/api/passwords/Hallo
 
 ### GET an unknown password by name
 GET http://localhost:3333/api/passwords/wifi1234ihfdsg
 
 ### DELETE a password by name
-DELETE  http://localhost:3333/api/passwords/WiFi
+DELETE  http://localhost:3333/api/passwords/Hallo
 
 ### POST a new password
 POST http://localhost:3333/api/passwords
@@ -14,4 +14,13 @@ Content-Type: application/json
 {
     "name": "WiFi",
     "value": "super-secret-password!!11"
+}
+
+### PATCH a  password
+PATCH http://localhost:3333/api/passwords
+Content-Type: application/json
+
+{
+    "name": "WiFi",
+    "value": "super-secret-password12345"
 }
